@@ -13,6 +13,71 @@ RELATIONSHIP_SCORES = {
     "UNRELATED": 0.00,
 }
 
+def match_experience_requirement(requirement, evidence_items):
+    """
+    Match an explicitly stated experience-duration requirement.
+
+    Experience is only considered when the candidate evidence
+    contains an explicit numeric duration. We never infer years
+    from job titles, dates, or vague phrases such as
+    'robust experience'.
+    """
+    required_years = requirement.get("minimum_experience")
+
+    if required_years is None:
+        return None
+
+    best_evidence = None
+
+    for evidence in evidence_items:
+        if (
+            evidence.get("polarity") == "NEGATED"
+            or evidence.get("status") == "NEGATED"
+        ):
+            continue
+
+        candidate_years = evidence.get("experience_years")
+
+        if candidate_years is None:
+            continue
+
+        if (
+            best_evidence is None
+            or candidate_years > best_evidence["experience_years"]
+        ):
+            best_evidence = {
+                "evidence": evidence,
+                "experience_years": candidate_years,
+            }
+
+    if best_evidence is None:
+        return None
+
+    evidence = best_evidence["evidence"]
+    candidate_years = best_evidence["experience_years"]
+
+    experience_score = min(
+        candidate_years / required_years,
+        1.0,
+    )
+
+    return {
+        "relationship": (
+            "EXACT"
+            if candidate_years >= required_years
+            else "PARTIAL"
+        ),
+        "semantic_score": experience_score,
+        "evidence_strength": evidence.get(
+            "evidence_strength",
+            0,
+        ),
+        "coverage": experience_score,
+        "final_requirement_score": experience_score,
+        "evidence": evidence,
+        "candidate_years": candidate_years,
+        "required_years": required_years,
+    }
 
 def classify_evidence_semantically(evidence_text, requirement_text):
     """
@@ -74,6 +139,48 @@ def match_requirement(requirement, evidence_items):
     )
 
     best_match = None
+    
+    experience_match = match_experience_requirement(
+        requirement,
+        evidence_items,
+    )
+
+    if experience_match is not None:
+        evidence = experience_match["evidence"]
+
+        if experience_match["relationship"] == "EXACT":
+            explanation = (
+                f"Candidate explicitly states "
+                f"{experience_match['candidate_years']:.1f} years "
+                f"of experience, meeting the required "
+                f"{experience_match['required_years']:.1f} years: "
+                f"'{evidence['text']}'."
+            )
+        else:
+            explanation = (
+                f"Candidate explicitly states "
+                f"{experience_match['candidate_years']:.1f} years "
+                f"of experience, below the required "
+                f"{experience_match['required_years']:.1f} years: "
+                f"'{evidence['text']}'."
+            )
+
+        return {
+            "requirement_id": requirement["requirement_id"],
+            "requirement": requirement["text"],
+            "canonical_concept": target,
+            "relationship": experience_match["relationship"],
+            "semantic_score": experience_match["semantic_score"],
+            "evidence_strength": experience_match["evidence_strength"],
+            "coverage": experience_match["coverage"],
+            "final_requirement_score": experience_match[
+                "final_requirement_score"
+            ],
+            "evidence_ids": [
+                evidence["evidence_id"]
+            ],
+            "explanation": explanation,
+        }
 
     for evidence in evidence_items:
 

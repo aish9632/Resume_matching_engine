@@ -1,6 +1,32 @@
 import re
 from typing import Dict, List
 
+EXPERIENCE_PATTERN = re.compile(
+    r"\b(\d+(?:\.\d+)?)\+?\s*"
+    r"(?:years?|yrs?)"
+    r"(?:\s+of\s+([a-zA-Z][a-zA-Z /&-]{0,80}))?"
+    r"\s*(?:experience|expertise)?\b",
+    re.IGNORECASE,
+)
+
+
+def extract_experience_years(text: str):
+    """
+    Extract explicitly stated years of experience.
+
+    Returns:
+        float | None: Explicitly stated years, or None when
+        the resume does not provide a numeric duration.
+    """
+    if not text:
+        return None
+
+    match = EXPERIENCE_PATTERN.search(text)
+    if not match:
+        return None
+
+    return float(match.group(1))
+
 
 ACTION_PATTERNS = {
     "BUILT": r"\b(built|build|developed|created|implemented)\b",
@@ -218,6 +244,7 @@ def extract_evidence_from_candidate(candidate: Dict) -> List[Dict]:
                         status,
                     ),
                     "extraction_confidence": 0.85,
+                    "experience_years": extract_experience_years(value),
                 }
             )
 
@@ -276,6 +303,7 @@ def extract_textual_evidence(candidate: Dict) -> List[Dict]:
                         status,
                     ),
                     "extraction_confidence": 0.80,
+                    "experience_years": extract_experience_years(unit),
                 }
             )
 
