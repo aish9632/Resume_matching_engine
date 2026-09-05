@@ -1,0 +1,61 @@
+﻿[
+  {
+    "case_id": "ADV001",
+    "type": "synonym",
+    "candidate_skill": "react.js",
+    "job_requirement": "react",
+    "expected": "EXACT"
+  },
+  {
+    "case_id": "ADV002",
+    "type": "capability",
+    "candidate_skill": "react",
+    "job_requirement": "frontend development",
+    "expected": "CAPABILITY"
+  },
+  {
+    "case_id": "ADV003",
+    "type": "adjacent",
+    "candidate_skill": "angular",
+    "job_requirement": "react",
+    "expected": "ADJACENT"
+  },
+  {
+    "case_id": "ADV004",
+    "type": "related",
+    "candidate_skill": "redux",
+    "job_requirement": "react",
+    "expected": "RELATED"
+  },
+  {
+    "case_id": "ADV005",
+    "type": "unrelated",
+    "candidate_skill": "html",
+    "job_requirement": "kubernetes",
+    "expected": "MISSING"
+  },
+  {
+    "case_id": "ADV006",
+    "type": "negation",
+    "candidate_skill": "kubernetes",
+    "candidate_text": "No experience with Kubernetes",
+    "job_requirement": "kubernetes",
+    "expected": "MISSING"
+  },
+  {
+    "case_id": "ADV007",
+    "type": "learning",
+    "candidate_skill": "kubernetes",
+    "candidate_text": "Currently learning Kubernetes",
+    "job_requirement": "kubernetes",
+    "expected": "EXACT"
+  },
+  {
+    "case_id": "ADV008",
+    "type": "keyword_stuffing",
+    "candidate_skill": "html",
+    "candidate_text": "HTML HTML HTML HTML HTML HTML",
+    "job_requirement": "kubernetes",
+    "expected": "MISSING"
+  }
+]
