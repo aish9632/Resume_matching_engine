@@ -109,6 +109,9 @@ def infer_source_type(section: str) -> str:
     if section in {"skills", "technical_skills"}:
         return "SKILLS"
 
+    if section in {"positions", "role_positions"}:
+        return "ROLE_CONTEXT"
+
     if section in {"certification", "certifications"}:
         return "CERTIFICATION"
 
@@ -127,6 +130,7 @@ def evidence_strength(source_type: str, action: str, status: str) -> int:
         "OTHER": 1,
         "EDUCATION": 2,
         "CERTIFICATION": 2,
+        "ROLE_CONTEXT": 2,
         "PROJECT": 3,
         "EXPERIENCE": 4,
     }
@@ -165,15 +169,17 @@ def extract_evidence_from_candidate(candidate: Dict) -> List[Dict]:
             "experience",
         ),
         (
-            "positions",
+            "positions", 
             normalized.get("positions", []),
-            "experience",
+            "positions"
         ),
+
         (
-            "role_positions",
+            "role_positions", 
             normalized.get("role_positions", []),
-            "experience",
+            "role_positions"
         ),
+        
         (
             "certifications",
             normalized.get("certifications", []),
@@ -232,6 +238,8 @@ def extract_textual_evidence(candidate: Dict) -> List[Dict]:
     sections = [
         ("career_objective", raw.get("career_objective", "")),
         ("responsibilities", raw.get("responsibilities", "")),
+        ("positions", raw.get("positions", "")),
+        ("role_positions", raw.get("role_positions", "")),
     ]
 
     counter = 1000
